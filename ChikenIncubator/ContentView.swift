@@ -139,37 +139,41 @@ struct IncubatorScreen: View {
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 16) {
-                if data.eggs.isEmpty {
-                    Spacer()
-                    Text("No eggs yet")
-                        .font(.title3)
-                        .foregroundColor(.gray)
-                    Spacer()
-                } else {
-                    ScrollView {
-                        VStack(spacing: 12) {
-                            ForEach(data.eggs) { egg in
-                                EggRow(egg: egg)
-                                    .padding()
-                                    .background(Color.white.opacity(0.8))
-                                    .cornerRadius(10)
-                                    .shadow(radius: 2)
+            ZStack {
+                Color(red: 0.97, green: 0.94, blue: 0.89).ignoresSafeArea()
+                
+                VStack(spacing: 16) {
+                    if data.eggs.isEmpty {
+                        Spacer()
+                        Text("No eggs yet")
+                            .font(.title3)
+                            .foregroundColor(.gray)
+                        Spacer()
+                    } else {
+                        ScrollView {
+                            VStack(spacing: 12) {
+                                ForEach(data.eggs) { egg in
+                                    EggRow(egg: egg)
+                                        .padding()
+                                        .background(Color.white.opacity(0.8))
+                                        .cornerRadius(10)
+                                        .shadow(radius: 2)
+                                }
                             }
+                            .padding()
                         }
-                        .padding()
+                    }
+                    Button(action: { showAdd = true }) {
+                        Label("Add Egg", systemImage: "plus.circle.fill")
+                            .font(.title2)
+                            .padding()
                     }
                 }
-                Button(action: { showAdd = true }) {
-                    Label("Add Egg", systemImage: "plus.circle.fill")
-                        .font(.title2)
-                        .padding()
+                .background(Color(red: 0.97, green: 0.94, blue: 0.89).ignoresSafeArea())
+                .navigationTitle("Incubator")
+                .sheet(isPresented: $showAdd) {
+                    AddEggScreen()
                 }
-            }
-            .background(Color(red: 0.97, green: 0.94, blue: 0.89).ignoresSafeArea())
-            .navigationTitle("Incubator")
-            .sheet(isPresented: $showAdd) {
-                AddEggScreen()
             }
         }
     }
@@ -218,37 +222,43 @@ struct AddEggScreen: View {
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 20) {
-                DatePicker("Start Date", selection: $date, displayedComponents: .date)
-                    .datePickerStyle(.graphical)
+            ZStack {
+                Color(red: 0.97, green: 0.94, blue: 0.89).ignoresSafeArea()
+                
+                ScrollView(showsIndicators: false) {
+                    VStack(spacing: 20) {
+                        DatePicker("Start Date", selection: $date, displayedComponents: .date)
+                            .datePickerStyle(.graphical)
+                            .padding()
+                        
+                        Stepper("Incubation Days: \(incubationDays)", value: $incubationDays, in: 18...24)
+                            .padding()
+                        
+                        Spacer()
+                        
+                        Button("Add Egg") {
+                            let egg = Egg(
+                                id: UUID(),
+                                startDate: date,
+                                incubationDays: incubationDays,
+                                turnedToday: false,
+                                expectedHatchDate: Calendar.current.date(byAdding: .day, value: incubationDays, to: date) ?? Date().addingTimeInterval(Double(incubationDays)*86400),
+                                hatched: false)
+                            data.eggs.append(egg)
+                            data.logs.append(LogEntry(id: UUID(), date: Date(), description: "Egg added, hatch expected \(egg.expectedHatchDate.formatted(date: .numeric, time: .omitted))"))
+                            dismiss()
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .padding(.bottom)
+                    }
                     .padding()
-
-                Stepper("Incubation Days: \(incubationDays)", value: $incubationDays, in: 18...24)
-                    .padding()
-
-                Spacer()
-
-                Button("Add Egg") {
-                    let egg = Egg(
-                        id: UUID(),
-                        startDate: date,
-                        incubationDays: incubationDays,
-                        turnedToday: false,
-                        expectedHatchDate: Calendar.current.date(byAdding: .day, value: incubationDays, to: date) ?? Date().addingTimeInterval(Double(incubationDays)*86400),
-                        hatched: false)
-                    data.eggs.append(egg)
-                    data.logs.append(LogEntry(id: UUID(), date: Date(), description: "Egg added, hatch expected \(egg.expectedHatchDate.formatted(date: .numeric, time: .omitted))"))
-                    dismiss()
-                }
-                .buttonStyle(.borderedProminent)
-                .padding(.bottom)
-            }
-            .padding()
-            .background(Color(red: 0.97, green: 0.94, blue: 0.89).ignoresSafeArea())
-            .navigationTitle("Add Egg")
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") { dismiss() }
+                    .background(Color(red: 0.97, green: 0.94, blue: 0.89).ignoresSafeArea())
+                    .navigationTitle("Add Egg")
+                    .toolbar {
+                        ToolbarItem(placement: .navigationBarLeading) {
+                            Button("Cancel") { dismiss() }
+                        }
+                    }
                 }
             }
         }
@@ -262,41 +272,45 @@ struct ChicksScreen: View {
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 16) {
-                if data.chicks.isEmpty {
-                    Spacer()
-                    Text("No Chicks Yet")
-                        .foregroundColor(.gray)
-                        .font(.title3)
-                    Spacer()
-                } else {
-                    ScrollView {
-                        VStack(spacing: 12) {
-                            ForEach(data.chicks) { chick in
-                                NavigationLink(destination: ChickDetailScreen(chick: chick)) {
-                                    ChickRow(chick: chick)
-                                        .padding() // растягиваем по ширине
-                                        .background(Color.white.opacity(0.8))
-                                        .cornerRadius(10)
-                                        .shadow(radius: 2)
+            ZStack {
+                Color(red: 0.97, green: 0.94, blue: 0.89).ignoresSafeArea()
+                
+                VStack(spacing: 16) {
+                    if data.chicks.isEmpty {
+                        Spacer()
+                        Text("No Chicks Yet")
+                            .foregroundColor(.gray)
+                            .font(.title3)
+                        Spacer()
+                    } else {
+                        ScrollView {
+                            VStack(spacing: 12) {
+                                ForEach(data.chicks) { chick in
+                                    NavigationLink(destination: ChickDetailScreen(chick: chick)) {
+                                        ChickRow(chick: chick)
+                                            .padding() // растягиваем по ширине
+                                            .background(Color.white.opacity(0.8))
+                                            .cornerRadius(10)
+                                            .shadow(radius: 2)
+                                    }
+                                    // отступы слева и справа
                                 }
-                                 // отступы слева и справа
+                                
                             }
-
+                            .padding()
                         }
-                        .padding()
+                    }
+                    Button(action: { showAdd = true }) {
+                        Label("Add Chick", systemImage: "plus.circle.fill")
+                            .font(.title2)
+                            .padding()
                     }
                 }
-                Button(action: { showAdd = true }) {
-                    Label("Add Chick", systemImage: "plus.circle.fill")
-                        .font(.title2)
-                        .padding()
+                .background(Color(red: 0.97, green: 0.94, blue: 0.89).ignoresSafeArea())
+                .navigationTitle("Chicks")
+                .sheet(isPresented: $showAdd) {
+                    AddChickScreen()
                 }
-            }
-            .background(Color(red: 0.97, green: 0.94, blue: 0.89).ignoresSafeArea())
-            .navigationTitle("Chicks")
-            .sheet(isPresented: $showAdd) {
-                AddChickScreen()
             }
         }
     }
@@ -480,55 +494,59 @@ struct HensScreen: View {
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 16) {
-                if data.hens.isEmpty {
-                    Spacer()
-                    Text("No Hens Yet")
-                        .foregroundColor(.gray)
-                        .font(.title3)
-                    Spacer()
-                } else {
-                    ScrollView {
-                        VStack(spacing: 12) {
-                            ForEach(data.hens) { hen in
-                                HStack {
-                                    if let photo = hen.photoName, let uiImg = loadImage(name: photo) {
-                                        Image(uiImage: uiImg)
-                                            .resizable()
-                                            .frame(width: 50, height: 50)
-                                            .clipShape(Circle())
+            ZStack {
+                Color(red: 0.97, green: 0.94, blue: 0.89).ignoresSafeArea()
+                
+                VStack(spacing: 16) {
+                    if data.hens.isEmpty {
+                        Spacer()
+                        Text("No Hens Yet")
+                            .foregroundColor(.gray)
+                            .font(.title3)
+                        Spacer()
+                    } else {
+                        ScrollView {
+                            VStack(spacing: 12) {
+                                ForEach(data.hens) { hen in
+                                    HStack {
+                                        if let photo = hen.photoName, let uiImg = loadImage(name: photo) {
+                                            Image(uiImage: uiImg)
+                                                .resizable()
+                                                .frame(width: 50, height: 50)
+                                                .clipShape(Circle())
+                                        }
+                                        VStack(alignment: .leading) {
+                                            Text(hen.name).bold()
+                                            Text("Breed: \(hen.breed)")
+                                            Text("Eggs this week: \(hen.eggCount)")
+                                            Text("Health: \(hen.healthStatus)")
+                                        }
+                                        Spacer()
                                     }
-                                    VStack(alignment: .leading) {
-                                        Text(hen.name).bold()
-                                        Text("Breed: \(hen.breed)")
-                                        Text("Eggs this week: \(hen.eggCount)")
-                                        Text("Health: \(hen.healthStatus)")
-                                    }
-                                    Spacer()
+                                    .padding()
+                                    .frame(maxWidth: .infinity)
+                                    .background(Color.white.opacity(0.8))
+                                    .cornerRadius(10)
+                                    .shadow(radius: 2)
+                                    .padding(.horizontal)
                                 }
-                                .padding()
-                                .frame(maxWidth: .infinity)
-                                .background(Color.white.opacity(0.8))
-                                .cornerRadius(10)
-                                .shadow(radius: 2)
-                                .padding(.horizontal)
                             }
+                            .padding(.vertical)
                         }
-                        .padding(.vertical)
+                    }
+                    Button {
+                        showAdd = true
+                    } label: {
+                        Label("Add Hen", systemImage: "plus.circle.fill")
+                            .font(.title2)
+                            .padding()
                     }
                 }
-                Button {
-                    showAdd = true
-                } label: {
-                    Label("Add Hen", systemImage: "plus.circle.fill")
-                        .font(.title2)
-                        .padding()
+                .background(Color(red: 0.97, green: 0.94, blue: 0.89).ignoresSafeArea())
+                .navigationTitle("Hens")
+                .sheet(isPresented: $showAdd) {
+                    AddHenScreen()
                 }
-            }
-            .background(Color(red: 0.97, green: 0.94, blue: 0.89).ignoresSafeArea())
-            .navigationTitle("Hens")
-            .sheet(isPresented: $showAdd) {
-                AddHenScreen()
             }
         }
     }
@@ -647,61 +665,65 @@ struct HealthScreen: View {
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 24) {
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("Incubator Environment")
-                            .font(.headline)
-                            .padding(.horizontal)
-
-                        TextField("Temperature (°C)", text: $tempInput)
-                            .keyboardType(.decimalPad)
-                            .textFieldStyle(.roundedBorder)
-                            .padding(.horizontal)
-
-                        TextField("Humidity (%)", text: $humidityInput)
-                            .keyboardType(.numberPad)
-                            .textFieldStyle(.roundedBorder)
-                            .padding(.horizontal)
-
-                        Button("Update") {
-                            if let temp = Double(tempInput), let hum = Double(humidityInput) {
-                                data.environment.temperature = temp
-                                data.environment.humidity = hum
-                                data.logs.append(LogEntry(id: UUID(), date: Date(), description: "Environment updated: Temp \(temp)°C, Humidity \(hum)%"))
+            ZStack {
+                Color(red: 0.97, green: 0.94, blue: 0.89).ignoresSafeArea()
+                
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 24) {
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text("Incubator Environment")
+                                .font(.headline)
+                                .padding(.horizontal)
+                            
+                            TextField("Temperature (°C)", text: $tempInput)
+                                .keyboardType(.decimalPad)
+                                .textFieldStyle(.roundedBorder)
+                                .padding(.horizontal)
+                            
+                            TextField("Humidity (%)", text: $humidityInput)
+                                .keyboardType(.numberPad)
+                                .textFieldStyle(.roundedBorder)
+                                .padding(.horizontal)
+                            
+                            Button("Update") {
+                                if let temp = Double(tempInput), let hum = Double(humidityInput) {
+                                    data.environment.temperature = temp
+                                    data.environment.humidity = hum
+                                    data.logs.append(LogEntry(id: UUID(), date: Date(), description: "Environment updated: Temp \(temp)°C, Humidity \(hum)%"))
+                                }
                             }
+                            .buttonStyle(.borderedProminent)
+                            .padding(.horizontal)
                         }
-                        .buttonStyle(.borderedProminent)
+                        
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Summary")
+                                .font(.headline)
+                            //
+                            
+                            Text("Temperature: \(data.environment.temperature, specifier: "%.1f") °C")
+                            
+                            
+                            Text("Humidity: \(data.environment.humidity, specifier: "%.0f") %")
+                            
+                            
+                            Text("Chicks Health Summary: \(healthSummary())")
+                            
+                            
+                            Text("Hens Health Summary: \(healthSummaryHens())")
+                            
+                        }
                         .padding(.horizontal)
+                        Spacer()
                     }
-
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Summary")
-                            .font(.headline)
-//
-
-                        Text("Temperature: \(data.environment.temperature, specifier: "%.1f") °C")
-                            
-
-                        Text("Humidity: \(data.environment.humidity, specifier: "%.0f") %")
-                            
-
-                        Text("Chicks Health Summary: \(healthSummary())")
-                            
-
-                        Text("Hens Health Summary: \(healthSummaryHens())")
-
-                    }
-                    .padding(.horizontal)
-                    Spacer()
+                    .padding(.vertical)
                 }
-                .padding(.vertical)
-            }
-            .background(Color(red: 0.97, green: 0.94, blue: 0.89).ignoresSafeArea())
-            .navigationTitle("Health")
-            .onAppear {
-                tempInput = "\(data.environment.temperature)"
-                humidityInput = "\(Int(data.environment.humidity))"
+                .background(Color(red: 0.97, green: 0.94, blue: 0.89).ignoresSafeArea())
+                .navigationTitle("Health")
+                .onAppear {
+                    tempInput = "\(data.environment.temperature)"
+                    humidityInput = "\(Int(data.environment.humidity))"
+                }
             }
         }
     }
@@ -728,36 +750,40 @@ struct GrowthScreen: View {
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 24) {
-                    ForEach(data.chicks) { chick in
-                        VStack(alignment: .leading) {
-                            Text(chick.name)
-                                .font(.headline)
-                                .padding(.horizontal)
-
-                            Chart {
-                                ForEach(chick.weightHistory) { w in
-                                    LineMark(
-                                        x: .value("Date", w.date),
-                                        y: .value("Weight", w.weight)
-                                    )
-                                    .interpolationMethod(.catmullRom)
+            ZStack {
+                Color(red: 0.97, green: 0.94, blue: 0.89).ignoresSafeArea()
+                
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 24) {
+                        ForEach(data.chicks) { chick in
+                            VStack(alignment: .leading) {
+                                Text(chick.name)
+                                    .font(.headline)
+                                    .padding(.horizontal)
+                                
+                                Chart {
+                                    ForEach(chick.weightHistory) { w in
+                                        LineMark(
+                                            x: .value("Date", w.date),
+                                            y: .value("Weight", w.weight)
+                                        )
+                                        .interpolationMethod(.catmullRom)
+                                    }
                                 }
+                                .frame(height: 150)
+                                .padding([.horizontal, .bottom])
                             }
-                            .frame(height: 150)
-                            .padding([.horizontal, .bottom])
+                            .background(Color.white.opacity(0.8))
+                            .cornerRadius(10)
+                            .shadow(radius: 2)
+                            .padding(.horizontal)
                         }
-                        .background(Color.white.opacity(0.8))
-                        .cornerRadius(10)
-                        .shadow(radius: 2)
-                        .padding(.horizontal)
                     }
+                    .padding(.vertical)
                 }
-                .padding(.vertical)
+                .background(Color(red: 0.97, green: 0.94, blue: 0.89).ignoresSafeArea())
+                .navigationTitle("Growth")
             }
-            .background(Color(red: 0.97, green: 0.94, blue: 0.89).ignoresSafeArea())
-            .navigationTitle("Growth")
         }
     }
 }
@@ -769,47 +795,51 @@ struct NotificationsScreen: View {
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 16) {
-                if data.tasks.isEmpty {
-                    Spacer()
-                    Text("No Tasks Yet")
-                        .foregroundColor(.gray)
-                        .font(.title3)
-                    Spacer()
-                } else {
-                    ScrollView {
-                        VStack(spacing: 12) {
-                            ForEach(data.tasks) { task in
-                                HStack {
-                                    Text(task.title)
-                                    Spacer()
-                                    Text(task.date, style: .date)
-                                    Image(systemName: task.done ? "checkmark.circle.fill" : "circle")
-                                        .foregroundColor(task.done ? .green : .gray)
-                                        .onTapGesture { toggleDone(task) }
+            ZStack {
+                Color(red: 0.97, green: 0.94, blue: 0.89).ignoresSafeArea()
+                
+                VStack(spacing: 16) {
+                    if data.tasks.isEmpty {
+                        Spacer()
+                        Text("No Tasks Yet")
+                            .foregroundColor(.gray)
+                            .font(.title3)
+                        Spacer()
+                    } else {
+                        ScrollView {
+                            VStack(spacing: 12) {
+                                ForEach(data.tasks) { task in
+                                    HStack {
+                                        Text(task.title)
+                                        Spacer()
+                                        Text(task.date, style: .date)
+                                        Image(systemName: task.done ? "checkmark.circle.fill" : "circle")
+                                            .foregroundColor(task.done ? .green : .gray)
+                                            .onTapGesture { toggleDone(task) }
+                                    }
+                                    .padding()
+                                    .background(Color.white.opacity(0.8))
+                                    .cornerRadius(10)
+                                    .shadow(radius: 2)
+                                    .padding(.horizontal)
                                 }
-                                .padding()
-                                .background(Color.white.opacity(0.8))
-                                .cornerRadius(10)
-                                .shadow(radius: 2)
-                                .padding(.horizontal)
                             }
+                            .padding(.vertical)
                         }
-                        .padding(.vertical)
+                    }
+                    Button {
+                        showAdd = true
+                    } label: {
+                        Label("Add Task", systemImage: "plus.circle.fill")
+                            .font(.title2)
+                            .padding()
                     }
                 }
-                Button {
-                    showAdd = true
-                } label: {
-                    Label("Add Task", systemImage: "plus.circle.fill")
-                        .font(.title2)
-                        .padding()
+                .background(Color(red: 0.97, green: 0.94, blue: 0.89).ignoresSafeArea())
+                .navigationTitle("Tasks")
+                .sheet(isPresented: $showAdd) {
+                    AddNotificationScreen()
                 }
-            }
-            .background(Color(red: 0.97, green: 0.94, blue: 0.89).ignoresSafeArea())
-            .navigationTitle("Tasks")
-            .sheet(isPresented: $showAdd) {
-                AddNotificationScreen()
             }
         }
     }
@@ -830,33 +860,39 @@ struct AddNotificationScreen: View {
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 20) {
-                TextField("Title", text: $title)
-                    .textFieldStyle(.roundedBorder)
-                    .padding(.horizontal)
-
-                DatePicker("Date", selection: $date, displayedComponents: [.date, .hourAndMinute])
-                    .datePickerStyle(.graphical)
-                    .padding(.horizontal)
-
-                Spacer()
-
-                Button("Add") {
-                    let newTask = NotificationTask(id: UUID(), title: title, date: date, done: false)
-                    data.tasks.append(newTask)
-                    data.logs.append(LogEntry(id: UUID(), date: Date(), description: "New task added: \(title)"))
-                    dismiss()
-                }
-                .disabled(title.isEmpty)
-                .buttonStyle(.borderedProminent)
-                .padding()
-            }
-            .background(Color(red: 0.97, green: 0.94, blue: 0.89).ignoresSafeArea())
-            .navigationTitle("Add Task")
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
-                        dismiss()
+            ZStack {
+                Color(red: 0.97, green: 0.94, blue: 0.89).ignoresSafeArea()
+                
+                ScrollView(showsIndicators: false) {
+                    VStack(spacing: 20) {
+                        TextField("Title", text: $title)
+                            .textFieldStyle(.roundedBorder)
+                            .padding(.horizontal)
+                        
+                        DatePicker("Date", selection: $date, displayedComponents: [.date, .hourAndMinute])
+                            .datePickerStyle(.graphical)
+                            .padding(.horizontal)
+                        
+                        Spacer()
+                        
+                        Button("Add") {
+                            let newTask = NotificationTask(id: UUID(), title: title, date: date, done: false)
+                            data.tasks.append(newTask)
+                            data.logs.append(LogEntry(id: UUID(), date: Date(), description: "New task added: \(title)"))
+                            dismiss()
+                        }
+                        .disabled(title.isEmpty)
+                        .buttonStyle(.borderedProminent)
+                        .padding()
+                    }
+                    .background(Color(red: 0.97, green: 0.94, blue: 0.89).ignoresSafeArea())
+                    .navigationTitle("Add Task")
+                    .toolbar {
+                        ToolbarItem(placement: .navigationBarLeading) {
+                            Button("Cancel") {
+                                dismiss()
+                            }
+                        }
                     }
                 }
             }
@@ -870,38 +906,42 @@ struct LogScreen: View {
 
     var body: some View {
         NavigationStack {
-            VStack {
-                if data.logs.isEmpty {
-                    Spacer()
-                    Text("No Logs Yet")
-                        .foregroundColor(.gray)
-                        .font(.title3)
-                    Spacer()
-                } else {
-                    ScrollView {
-                        VStack(alignment: .leading, spacing: 12) {
-                            ForEach(data.logs.sorted(by: { $0.date > $1.date })) { log in
-                                VStack(alignment: .leading) {
-                                    Text(log.description)
-                                        .font(.body)
-                                    Text(log.date, style: .date)
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
+            ZStack {
+                Color(red: 0.97, green: 0.94, blue: 0.89).ignoresSafeArea()
+                
+                VStack {
+                    if data.logs.isEmpty {
+                        Spacer()
+                        Text("No Logs Yet")
+                            .foregroundColor(.gray)
+                            .font(.title3)
+                        Spacer()
+                    } else {
+                        ScrollView {
+                            VStack(alignment: .leading, spacing: 12) {
+                                ForEach(data.logs.sorted(by: { $0.date > $1.date })) { log in
+                                    VStack(alignment: .leading) {
+                                        Text(log.description)
+                                            .font(.body)
+                                        Text(log.date, style: .date)
+                                            .font(.caption)
+                                            .foregroundColor(.secondary)
+                                    }
+                                    .padding()
+                                    .background(Color.white.opacity(0.8))
+                                    .cornerRadius(8)
+                                    .shadow(radius: 1)
+                                    .padding(.horizontal)
                                 }
-                                .padding()
-                                .background(Color.white.opacity(0.8))
-                                .cornerRadius(8)
-                                .shadow(radius: 1)
-                                .padding(.horizontal)
                             }
+                            .padding(.vertical)
                         }
-                        .padding(.vertical)
                     }
                 }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(Color(red: 0.97, green: 0.94, blue: 0.89).ignoresSafeArea())
+                .navigationTitle("Log")
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)  // Растягиваем VStack на весь экран
-            .background(Color(red: 0.97, green: 0.94, blue: 0.89).ignoresSafeArea())
-            .navigationTitle("Log")
         }
     }
 }
